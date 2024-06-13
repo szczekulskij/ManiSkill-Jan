@@ -99,6 +99,10 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
         self._moreRandomization = moreRandomization
         self._lessStateInformation = lessStateInformation
 
+        # assert that _lessStateInformation and _moreRandomization are boolean
+        assert isinstance(self._lessStateInformation, bool)
+        assert isinstance(self._moreRandomization, bool)
+
         super().__init__(*args, robot_uids=robot_uids, **kwargs)
 
     @property
