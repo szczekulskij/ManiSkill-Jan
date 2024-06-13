@@ -89,13 +89,16 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
     def __init__(
         self,
         *args,
-        param1=True,
+        lessStateInformation=False,
+        moreRandomization=False,
         robot_uids="panda",
         robot_init_qpos_noise=0.02,
         **kwargs
     ):
         self.robot_init_qpos_noise = robot_init_qpos_noise
-        self._parameter1 = param1
+        self._moreRandomization = moreRandomization
+        self._lessStateInformation = lessStateInformation
+
         super().__init__(*args, robot_uids=robot_uids, **kwargs)
 
     @property
@@ -153,9 +156,14 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
             b = len(env_idx)
             self.table_scene.initialize(env_idx)
 
+            if not self._moreRandomization:
+                const = 0.2
+            else:
+                const = 0.5
+
             # set the cube's initial position
             xyz = torch.zeros((b, 3))
-            xyz[..., :2] = torch.rand((b, 2)) * 0.2 - 0.1
+            xyz[..., :2] = torch.rand((b, 2)) * const - 0.1
             xyz[..., 2] = _cube_half_size
             q = [1, 0, 0, 0]
             obj_pose = Pose.create_from_pq(p=xyz, q=q)
@@ -173,9 +181,14 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
             )
 
             # set the hockey stick's initial position
+            if not self._moreRandomization:
+                const = 0.1
+            else:
+                const = 0.5
+
             stick_offset = torch.tensor(
                 [
-                    -(_stick_length - 2 * _cube_half_size - torch.rand(1) * 0.1),
+                    -(_stick_length - 2 * _cube_half_size - torch.rand(1) * const),
                     -(_stick_end_length + 3 * _cube_half_size),
                     0,
                 ]
@@ -250,13 +263,20 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
             tcp_pose=self.agent.tcp.pose.raw_pose,
         )
         if self._obs_mode in ["state", "state_dict"]:
-            obs.update(
-                obj_pose=self.cube.pose.raw_pose,
-                dst_cube_to_end_of_stick=dst_cube_to_end_of_stick,
-                dst_robot_to_grasp_stick_pos=dst_robot_to_grasp_stick_pos,
-                stick_pose=self.hockey_stick.pose.raw_pose,
-                obj_to_goal_dist=self.goal_region.pose.p - self.cube.pose.p,
-            )
+            if not self._lessStateInformation:
+                obs.update(
+                    obj_pose=self.cube.pose.raw_pose,
+                    dst_cube_to_end_of_stick=dst_cube_to_end_of_stick,
+                    dst_robot_to_grasp_stick_pos=dst_robot_to_grasp_stick_pos,
+                    stick_pose=self.hockey_stick.pose.raw_pose,
+                    obj_to_goal_dist=self.goal_region.pose.p - self.cube.pose.p,
+                )
+            else:
+                obs.update(
+                    obj_pose=self.cube.pose.raw_pose,
+                    stick_pose=self.hockey_stick.pose.raw_pose,
+                    obj_to_goal_dist=self.goal_region.pose.p - self.cube.pose.p,
+                )
         return obs
 
     def compute_dense_reward(self, obs: Any, action: Array, info: Dict):
