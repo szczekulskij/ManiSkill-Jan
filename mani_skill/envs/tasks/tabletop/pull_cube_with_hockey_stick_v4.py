@@ -64,7 +64,7 @@ _stick_thickness = 5e-3  # thickness of sticks in y and z direction
 
 
 @register_env("PullCubeWithHockeyStick-v1", max_episode_steps=100)
-class PullCubeWithHockeyStickEnv(BaseEnv):
+class PullCubeWithHockeyStickV4Env(BaseEnv):
     """
     Task Description
     ----------------
@@ -86,16 +86,8 @@ class PullCubeWithHockeyStickEnv(BaseEnv):
     SUPPORTED_ROBOTS = ["panda"]
     agent: Union[Panda]
 
-    def __init__(
-        self,
-        *args,
-        param1=True,
-        robot_uids="panda",
-        robot_init_qpos_noise=0.02,
-        **kwargs
-    ):
+    def __init__(self, *args, robot_uids="panda", robot_init_qpos_noise=0.02, **kwargs):
         self.robot_init_qpos_noise = robot_init_qpos_noise
-        self._parameter1 = param1
         super().__init__(*args, robot_uids=robot_uids, **kwargs)
 
     @property

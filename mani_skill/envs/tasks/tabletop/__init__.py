@@ -8,6 +8,7 @@ from .plug_charger import PlugChargerEnv
 from .poke_cube import PokeCubeEnv
 from .pull_cube import PullCubeEnv
 from .pull_cube_with_hockey_stick import PullCubeWithHockeyStickEnv
+from .pull_cube_with_hockey_stick_v2 import PullCubeWithHockeyStickV2Env
 from .push_cube import PushCubeEnv
 from .stack_cube import StackCubeEnv
 from .turn_faucet import TurnFaucetEnv
